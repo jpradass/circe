@@ -37,19 +37,23 @@ func (w *Watcher) Init() error {
 				if !ok {
 					return
 				}
-				fmt.Printf("received event: %v", event)
+				fmt.Printf("received event: %v\n", event)
 
-				fileinfo, err := os.Stat(event.Name)
-				if err != nil {
-					fmt.Printf("there was an error getting stat of file. Details: %s\n", err.Error())
-					return
-				}
+				if event.Has(fsnotify.Write) || event.Has(fsnotify.Create) {
+					fileinfo, err := os.Stat(event.Name)
+					if err != nil {
+						fmt.Printf("there was an error getting stat of file. Details: %s\n", err.Error())
+						return
+					}
 
-				if event.Has(fsnotify.Write) {
 					if fileinfo.IsDir() {
 						// look for file inside dir
+						fmt.Println("detected directory. Looking for archives inside it...")
 					} else {
 						// We move file to destination
+						ext := filepath.Ext(event.Name)
+						fmt.Printf("moving a file of type %s\n", ext)
+
 						err := os.Rename(event.Name, fmt.Sprintf("%s/%s", w.destination, filepath.Base(event.Name)))
 						if err != nil {
 							fmt.Printf("there was an error moving file %s to destination %s. Details: %s\n", filepath.Base(event.Name), w.destination, err.Error())
@@ -61,9 +65,6 @@ func (w *Watcher) Init() error {
 					// do something
 				}
 
-				if event.Has(fsnotify.Create) {
-					// do something else
-				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
 					return
@@ -75,6 +76,7 @@ func (w *Watcher) Init() error {
 		}
 	}()
 
+	fmt.Printf("creating watcher for paths: %v\n", w.filepaths)
 	for _, path := range w.filepaths {
 		err = watcher.Add(path)
 		if err != nil {
