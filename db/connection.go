@@ -48,7 +48,7 @@ func runChecks() error {
     _id INTEGER PRIMARY KEY AUTOINCREMENT,
     filename TEXT NOT NULL,
     status TEXT NOT NULL,
-    os_path TEXT NOT NULL,
+    os_path TEXT NOT NULL
   );`
 
 	_, err = conn.Exec(checkTable)

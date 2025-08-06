@@ -35,13 +35,13 @@ func main() {
 
 	// initializes db connection
 	if err := db.Init(); err != nil {
-		fmt.Printf("error connecting to db: %s", err.Error())
+		fmt.Printf("error connecting to db: %s\n", err.Error())
 		os.Exit(1)
 	}
 
 	watcher := pkg.NewWatcher(filepaths, *destination)
 	if err := watcher.Init(); err != nil {
-		fmt.Printf("system error: %s", err.Error())
+		fmt.Printf("system error: %s\n", err.Error())
 		os.Exit(1)
 	}
 

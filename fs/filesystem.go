@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 )
 
-func MoveFile(filename, destination string) error {
-	ext := filepath.Ext(filename)
+func MoveFile(file_path, destination string) error {
+	ext := filepath.Ext(file_path)
 	fmt.Printf("moving a file of type %s\n", ext)
 
-	err := os.Rename(filename, fmt.Sprintf("%s/%s", destination, filepath.Base(filename)))
+	err := os.Rename(file_path, fmt.Sprintf("%s/%s", destination, filepath.Base(file_path)))
 	if err != nil {
 		return err
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
+	"github.com/jpradass/circe/db"
 	"github.com/jpradass/circe/fs"
 )
 
@@ -52,8 +53,20 @@ func (w *Watcher) Init() error {
 						// look for file inside dir
 						fmt.Println("detected directory. Looking for archives inside it...")
 					} else {
+						if err := db.AddFile(filepath.Base(event.Name), event.Name); err != nil {
+							fmt.Printf("there was an error setting file into db. Details: %s\n", err.Error())
+							return
+						}
 						// We move file to destination
-						fs.MoveFile(event.Name, w.destination)
+						if err := fs.MoveFile(event.Name, w.destination); err != nil {
+							fmt.Printf("there was an error moving the file. Details: %s\n", err.Error())
+							return
+						}
+
+						if err := db.SetStatusToFile(filepath.Base(event.Name)); err != nil {
+							fmt.Printf("there was an error settings `sent` status to filename %s", event.Name)
+							return
+						}
 						// When move is done, we need to warn the other part
 					}
 					// do something
