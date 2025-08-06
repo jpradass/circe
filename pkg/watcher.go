@@ -8,6 +8,8 @@ import (
 	"syscall"
 
 	"github.com/fsnotify/fsnotify"
+
+	"github.com/jpradass/circe/fs"
 )
 
 type Watcher struct {
@@ -51,15 +53,7 @@ func (w *Watcher) Init() error {
 						fmt.Println("detected directory. Looking for archives inside it...")
 					} else {
 						// We move file to destination
-						ext := filepath.Ext(event.Name)
-						fmt.Printf("moving a file of type %s\n", ext)
-
-						err := os.Rename(event.Name, fmt.Sprintf("%s/%s", w.destination, filepath.Base(event.Name)))
-						if err != nil {
-							fmt.Printf("there was an error moving file %s to destination %s. Details: %s\n", filepath.Base(event.Name), w.destination, err.Error())
-							return
-						}
-
+						fs.MoveFile(event.Name, w.destination)
 						// When move is done, we need to warn the other part
 					}
 					// do something

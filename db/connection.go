@@ -6,6 +6,24 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type status int
+
+const (
+	queued status = iota
+	processed
+	failed
+	waiting
+	sent
+)
+
+var statusString = map[status]string{
+	queued:    "queued",
+	processed: "processed",
+	failed:    "failed",
+	waiting:   "waiting",
+	sent:      "sent",
+}
+
 var (
 	conn *sql.DB
 	err  error
@@ -25,13 +43,17 @@ func Init() error {
 }
 
 func runChecks() error {
-	if err := watcherChecks(); err != nil {
+	checkTable := `
+  CREATE TABLE IF NOT EXISTS file_process (
+    _id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    status TEXT NOT NULL,
+    os_path TEXT NOT NULL,
+  );`
+
+	_, err = conn.Exec(checkTable)
+	if err != nil {
 		return err
 	}
-
-	if err := executorChecks(); err != nil {
-		return err
-	}
-
 	return nil
 }
